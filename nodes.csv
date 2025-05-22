@@ -1,0 +1,11 @@
+id,type,x,y,demand,ready_time,due_time,service_time
+0,depot,5,4,0,0,1440,0
+1,customer,4,2,35,0,45,2
+2,customer,8,1,20,0,40,2
+3,customer,6,7,25,0,50,3
+4,customer,2,6,35,0,55,3
+5,customer,9,5,30,0,60,4
+6,customer,2,3,40,0,50,3
+7,customer,4,6,25,0,50,3
+8,customer,8,7,25,0,50,3
+9,customer,10,3,30,0,50,3
