@@ -99,19 +99,62 @@ function solve_vrp(nodes_path::String; parameters=VRPParameters(3,100,true))
                 df=df)
 end
 
-#
-        ### PLOTTING/PRINTING FUNCTION WILL BE ADDED HERE
-#
+function plot_routes(df::DataFrame, routes::Dict{Int,Vector{Int}})
+    depot    = findfirst(df.type .== "depot")
+    customer = setdiff(1:nrow(df), depot)
+
+    scatter(df.x[customer], df.y[customer];
+        label="Customers", marker=:circle, markersize=10, color=:blue,xlim=(0,12), ylim=(0,10))
+    scatter!([df.x[depot]], [df.y[depot]];
+        label="Depot",     marker=:circle, markersize=10, color=:red)
+    base_colors = [:red, :green, :blue, :purple, :orange, :cyan, :magenta]
+    vehicle_colors = base_colors[1:length(routes)]
+
+    for row in eachrow(df)
+        annotate!(row.x + 0.0, row.y + 0.0, text(string(row.id), 12, :white))
+    end
+
+    for (k, route) in sort(collect(routes))
+        pts = [depot; route; depot]
+        xs, ys = df.x[pts], df.y[pts]
+        plot!(xs, ys;
+            lw=2,
+            color=vehicle_colors[k],
+            label="Vehicle $k",
+        )
+        dx = diff(xs)
+        dy = diff(ys)
+        inset_start_x = xs[1:end-1] .+ 0.1 .* dx
+        inset_start_y = ys[1:end-1] .+ 0.1 .* dy
+        arrow_dx = 0.7 .* dx
+        arrow_dy = 0.7 .* dy
+
+        quiver!(
+            inset_start_x, inset_start_y,
+            quiver = (arrow_dx, arrow_dy),
+            arrow = true,
+            lw = 3,
+            arrowsize = 0.2,
+            color = vehicle_colors[k],
+        )
+    end
+
+    # 4) Final polish
+    xlabel!("X")
+    ylabel!("Y")
+    title!("VRP Solution")
+    plot!(legend = :topright)
+    mkpath("plots")
+    savefig("plots/vrp_routes.png")
+end
 
 function main()
-    parameters=VRPParameters(3, 100, true)
+    parameters=VRPParameters(4, 70, true)
     result=solve_vrp("nodes.csv", parameters=parameters)
+    plot_routes(result.df, result.Routes)
     println("Distance: ", result.sum_distance)
     println("Routes: ", result.Routes)
 
-    #
-        ### PLOTTING/PRINTING FUNCTION CALL
-    #
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
